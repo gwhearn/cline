@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Ansible Playbook Generator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">Generate Ansible Playbooks from Natural Language</h2>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Describe what you want your Ansible playbook to do in plain English, and our AI will generate a complete, 
+                    validated Ansible playbook for you.
+                </p>
+                
+                <form action="/generate" method="post" class="mt-4">
+                    <div class="mb-4">
+                        <label for="description" class="form-label fw-bold">Describe what you want your Ansible playbook to do:</label>
+                        <textarea 
+                            class="form-control" 
+                            id="description" 
+                            name="description" 
+                            rows="5" 
+                            placeholder="Example: Install and configure Nginx on Ubuntu servers, set up a virtual host for example.com, and ensure the service starts on boot."
+                            required
+                        ></textarea>
+                        <div class="form-text">
+                            Be as specific as possible. Include details about the target systems, desired configurations, and any specific requirements.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="additional_context" class="form-label fw-bold">Additional Context (Optional):</label>
+                        <textarea 
+                            class="form-control" 
+                            id="additional_context" 
+                            name="additional_context" 
+                            rows="3" 
+                            placeholder="Example: Target systems are Ubuntu 22.04. The playbook should be idempotent and include proper error handling."
+                        ></textarea>
+                        <div class="form-text">
+                            Provide any additional context or requirements that might help generate a better playbook.
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="generate-btn">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="loading-spinner"></span>
+                            Generate Ansible Playbook
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span>Proper directory structure</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span>Validated with ansible-lint</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span>Ready to download and use</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4 shadow">
+            <div class="card-header bg-light">
+                <h3 class="mb-0">How It Works</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h1 class="display-4 text-primary mb-3">1</h1>
+                                <h5>Describe Your Task</h5>
+                                <p>Enter a natural language description of what you want your Ansible playbook to do.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h1 class="display-4 text-primary mb-3">2</h1>
+                                <h5>AI Generation</h5>
+                                <p>Our AI generates a complete Ansible playbook with proper structure and best practices.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h1 class="display-4 text-primary mb-3">3</h1>
+                                <h5>Download & Use</h5>
+                                <p>Review the generated playbook, download it, and use it in your environment.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Show loading spinner when form is submitted
+    document.getElementById('generate-btn').addEventListener('click', function() {
+        document.getElementById('loading-spinner').classList.remove('d-none');
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+    });
+</script>
+{% endblock %}

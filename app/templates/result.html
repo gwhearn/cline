@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Generated Ansible Playbook{% endblock %}
+
+{% block head %}
+<style>
+    .file-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .code-preview {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .validation-message {
+        white-space: pre-wrap;
+    }
+    
+    .nav-tabs .nav-link {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Generated Ansible Playbook</h1>
+            <a href="/" class="btn btn-outline-primary">Generate Another</a>
+        </div>
+        <p class="lead">Based on your description: <em>"{{ description }}"</em></p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- File List -->
+    <div class="col-md-3 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Files</h5>
+            </div>
+            <div class="card-body p-0 file-list">
+                <div class="list-group list-group-flush">
+                    {% for file in files %}
+                    <a 
+                        class="list-group-item list-group-item-action {% if loop.first %}active{% endif %}" 
+                        id="file-{{ loop.index }}-tab"
+                        data-bs-toggle="list" 
+                        href="#file-{{ loop.index }}" 
+                        role="tab"
+                    >
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 text-truncate">{{ file.filename }}</h6>
+                        </div>
+                        <small class="text-muted">{{ file.path }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- File Content and Validation -->
+    <div class="col-md-9">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-light">
+                <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="code-tab" data-bs-toggle="tab" href="#code" role="tab">Code</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="validation-tab" data-bs-toggle="tab" href="#validation" role="tab">Validation</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content">
+                    <!-- Code Tab -->
+                    <div class="tab-pane fade show active" id="code" role="tabpanel">
+                        <div class="tab-content">
+                            {% for file in files %}
+                            <div 
+                                class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                                id="file-{{ loop.index }}" 
+                                role="tabpanel"
+                            >
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h5>{{ file.path }}/{{ file.filename }}</h5>
+                                </div>
+                                <div class="code-preview">
+                                    <pre><code class="language-yaml">{{ file.content }}</code></pre>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Validation Tab -->
+                    <div class="tab-pane fade" id="validation" role="tabpanel">
+                        <h5>Validation Results</h5>
+                        
+                        {% if validation.is_valid %}
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            Playbook validation successful!
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Playbook validation found issues that should be addressed.
+                        </div>
+                        {% endif %}
+                        
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                {% for message in validation.messages %}
+                                <div class="validation-message mb-2">{{ message }}</div>
+                                {% if not loop.last %}<hr>{% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Download Section -->
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">Ready to use this playbook?</h5>
+                        <p class="text-muted mb-0">Download the complete playbook with all files and directory structure.</p>
+                    </div>
+                    <a href="{{ download_url }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-download me-2"></i>
+                        Download Playbook
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // Initialize syntax highlighting
+        document.querySelectorAll('pre code').forEach((el) => {
+            hljs.highlightElement(el);
+        });
+        
+        // Handle file tab clicks
+        document.querySelectorAll('[data-bs-toggle="list"]').forEach(tabEl => {
+            tabEl.addEventListener('shown.bs.tab', event => {
+                // Re-highlight the code in the newly shown tab
+                const tabId = event.target.getAttribute('href');
+                const codeBlock = document.querySelector(tabId + ' pre code');
+                if (codeBlock) {
+                    hljs.highlightElement(codeBlock);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
