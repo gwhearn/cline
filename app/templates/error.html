@@ -20,7 +20,12 @@
                 <div class="mt-4">
                     <h5>Possible solutions:</h5>
                     <ul>
-                        <li>Check your OpenAI API key configuration</li>
+                        <li>Check your LLM provider configuration:
+                            <ul>
+                                <li>For OpenAI: Verify your API key is correct and has sufficient credits</li>
+                                <li>For Ollama: Ensure Ollama is running and the specified model is available</li>
+                            </ul>
+                        </li>
                         <li>Ensure ansible-lint is properly installed</li>
                         <li>Try a different or more specific description</li>
                         <li>Check the server logs for more details</li>

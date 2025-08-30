@@ -11,7 +11,7 @@ from app.api.routes import router as api_router
 from app.config import settings
 from app.models.schemas import PlaybookRequest
 from app.services.ansible_service import AnsibleService
-from app.services.openai_service import OpenAIService
+from app.services.llm.factory import LLMProviderFactory
 
 # Configure logging
 logging.basicConfig(
@@ -79,14 +79,17 @@ async def generate(
         )
         
         # Initialize services
-        openai_service = OpenAIService()
+        llm_factory = LLMProviderFactory()
         ansible_service = AnsibleService()
         
         # Generate a unique ID for the playbook
         playbook_id = ansible_service.generate_playbook_id()
         
-        # Generate the playbook files
-        playbook_files = openai_service.generate_ansible_playbook(
+        # Get the LLM provider
+        llm_provider = llm_factory.get_provider()
+        
+        # Generate the playbook files using the available LLM provider
+        playbook_files = llm_provider.generate_ansible_playbook(
             playbook_request.description,
             playbook_request.additional_context
         )
@@ -110,6 +113,8 @@ async def generate(
                 "validation": validation_result,
                 "download_url": download_url,
                 "description": description,
+                "llm_provider": llm_provider.get_provider_name(),
+                "llm_model": llm_provider.get_model_name(),
             }
         )
         
@@ -130,7 +135,15 @@ async def health_check():
     """
     Health check endpoint.
     """
-    return {"status": "ok"}
+    # Check if any LLM provider is available
+    llm_factory = LLMProviderFactory()
+    available_providers = llm_factory.get_available_providers()
+    
+    return {
+        "status": "ok",
+        "llm_providers": available_providers,
+        "preferred_provider": settings.PREFERRED_LLM_PROVIDER
+    }
 
 
 if __name__ == "__main__":

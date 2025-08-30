@@ -1,10 +1,12 @@
 # Ansible Playbook Generator
 
-A web application that generates Ansible playbooks from natural language descriptions using AI.
+A web application that generates Ansible playbooks from natural language descriptions using AI, with support for both cloud-based and local LLM providers.
 
 ## Features
 
 - Convert natural language descriptions into Ansible playbooks
+- Support for multiple LLM providers (OpenAI and Ollama)
+- Run completely locally with Ollama or use OpenAI's API
 - Validate generated playbooks using ansible-lint
 - Download validated playbooks with proper directory structure
 - Secure Python-based implementation
@@ -13,7 +15,7 @@ A web application that generates Ansible playbooks from natural language descrip
 
 - Backend: FastAPI (Python)
 - Frontend: Jinja2 templates with Bootstrap and HTMX
-- AI: OpenAI API
+- AI: OpenAI API or Ollama (local LLM)
 - Validation: ansible-lint
 
 ## Installation
@@ -35,10 +37,30 @@ A web application that generates Ansible playbooks from natural language descrip
    pip install -r requirements.txt
    ```
 
-4. Create a `.env` file based on `.env.example` and add your OpenAI API key:
+4. Create a `.env` file based on `.env.example` and configure your LLM provider:
    ```
    cp .env.example .env
-   # Edit .env and add your OpenAI API key
+   # Edit .env and configure your preferred LLM provider
+   ```
+
+   You can choose between OpenAI (cloud-based) or Ollama (local):
+   
+   For OpenAI:
+   ```
+   PREFERRED_LLM_PROVIDER=openai
+   OPENAI_API_KEY=your_openai_api_key_here
+   ```
+   
+   For Ollama (local LLM):
+   ```
+   PREFERRED_LLM_PROVIDER=ollama
+   OLLAMA_API_BASE=http://localhost:11434
+   OLLAMA_MODEL=llama3
+   ```
+   
+   Note: To use Ollama, you need to [install Ollama](https://ollama.ai/download) and pull your preferred model:
+   ```
+   ollama pull llama3
    ```
 
 ## Usage
@@ -63,10 +85,14 @@ A web application that generates Ansible playbooks from natural language descrip
 
 ## Future Enhancements
 
-- User authentication and authorization
-- Host and owner validation
+- Local user authentication and authorization
 - Playbook history and management
 - Advanced playbook customization options
+- Improved error handling and validation feedback
+- Performance optimizations for local deployment
+- Enhanced UI/UX including dark mode
+- Template library for common playbook patterns
+- Local variable management
 - Integration with Ansible Tower/AWX
 
 ## License

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import ValidationError
 
+from app.api.dependencies import get_ansible_service, get_llm_factory
 from app.models.schemas import (
     ErrorResponse,
     PlaybookFile,
@@ -14,7 +15,7 @@ from app.models.schemas import (
     ValidationResult,
 )
 from app.services.ansible_service import AnsibleService
-from app.services.openai_service import OpenAIService
+from app.services.llm.factory import LLMProviderFactory
 
 logger = logging.getLogger(__name__)
 
@@ -22,20 +23,23 @@ router = APIRouter()
 
 
 @router.post("/generate", response_model=PlaybookResponse)
-async def generate_playbook(request: PlaybookRequest):
+async def generate_playbook(
+    request: PlaybookRequest,
+    llm_factory: LLMProviderFactory = Depends(get_llm_factory),
+    ansible_service: AnsibleService = Depends(get_ansible_service)
+):
     """
     Generate an Ansible playbook from a natural language description.
     """
     try:
-        # Initialize services
-        openai_service = OpenAIService()
-        ansible_service = AnsibleService()
-        
         # Generate a unique ID for the playbook
         playbook_id = ansible_service.generate_playbook_id()
         
-        # Generate the playbook files
-        playbook_files = openai_service.generate_ansible_playbook(
+        # Get the LLM provider
+        llm_provider = llm_factory.get_provider()
+        
+        # Generate the playbook files using the available LLM provider
+        playbook_files = llm_provider.generate_ansible_playbook(
             request.description,
             request.additional_context
         )
@@ -54,7 +58,9 @@ async def generate_playbook(request: PlaybookRequest):
             playbook_id=playbook_id,
             files=playbook_files,
             validation=validation_result,
-            download_url=download_url
+            download_url=download_url,
+            llm_provider=llm_provider.get_provider_name(),
+            llm_model=llm_provider.get_model_name()
         )
         
     except Exception as e:
@@ -69,7 +75,10 @@ async def generate_playbook(request: PlaybookRequest):
 
 
 @router.get("/download/{playbook_id}")
-async def download_playbook(playbook_id: str):
+async def download_playbook(
+    playbook_id: str,
+    ansible_service: AnsibleService = Depends(get_ansible_service)
+):
     """
     Download a generated Ansible playbook as a ZIP archive.
     """
@@ -120,13 +129,14 @@ async def download_playbook(playbook_id: str):
 
 
 @router.post("/validate", response_model=ValidationResult)
-async def validate_playbook(files: List[UploadFile] = File(...)):
+async def validate_playbook(
+    files: List[UploadFile] = File(...),
+    ansible_service: AnsibleService = Depends(get_ansible_service)
+):
     """
     Validate an uploaded Ansible playbook.
     """
     try:
-        # Initialize the Ansible service
-        ansible_service = AnsibleService()
         
         # Convert uploaded files to PlaybookFile objects
         playbook_files = []

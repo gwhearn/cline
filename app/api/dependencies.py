@@ -1,19 +1,19 @@
 from typing import Generator
 
 from app.services.ansible_service import AnsibleService
-from app.services.openai_service import OpenAIService
+from app.services.llm.factory import LLMProviderFactory
 
 
-def get_openai_service() -> Generator[OpenAIService, None, None]:
+def get_llm_factory() -> Generator[LLMProviderFactory, None, None]:
     """
-    Dependency for getting an OpenAI service instance.
+    Dependency for getting an LLM provider factory instance.
     """
-    service = OpenAIService()
+    factory = LLMProviderFactory()
     try:
-        yield service
+        yield factory
     finally:
         # Clean up any resources if needed
-        pass
+        factory.reset_provider()
 
 
 def get_ansible_service() -> Generator[AnsibleService, None, None]:

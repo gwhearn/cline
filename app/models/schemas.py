@@ -72,6 +72,16 @@ class PlaybookResponse(BaseModel):
         None,
         description="URL to download the playbook"
     )
+    
+    llm_provider: Optional[str] = Field(
+        None,
+        description="Name of the LLM provider used to generate the playbook"
+    )
+    
+    llm_model: Optional[str] = Field(
+        None,
+        description="Name of the LLM model used to generate the playbook"
+    )
 
 
 class ErrorResponse(BaseModel):

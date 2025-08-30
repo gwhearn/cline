@@ -15,6 +15,15 @@
                     validated Ansible playbook for you.
                 </p>
                 
+                <div class="alert alert-info" id="llm-provider-info">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <div>
+                            <span>Checking available LLM providers...</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <form action="/generate" method="post" class="mt-4">
                     <div class="mb-4">
                         <label for="description" class="form-label fw-bold">Describe what you want your Ansible playbook to do:</label>
@@ -124,6 +133,59 @@
         document.getElementById('loading-spinner').classList.remove('d-none');
         this.disabled = true;
         this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+    });
+    
+    // Check available LLM providers
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/health')
+            .then(response => response.json())
+            .then(data => {
+                const providerInfo = document.getElementById('llm-provider-info');
+                
+                if (data.llm_providers && data.llm_providers.length > 0) {
+                    const providerName = data.preferred_provider.charAt(0).toUpperCase() + data.preferred_provider.slice(1);
+                    providerInfo.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <div>
+                                <strong>Active LLM Provider:</strong> ${providerName}
+                                <div class="small text-muted">Available providers: ${data.llm_providers.join(', ')}</div>
+                            </div>
+                        </div>
+                    `;
+                    providerInfo.classList.remove('alert-info');
+                    providerInfo.classList.add('alert-success');
+                } else {
+                    providerInfo.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                            <div>
+                                <strong>Warning:</strong> No LLM providers available. Please check your configuration.
+                                <div class="small">See the <a href="/docs" target="_blank">documentation</a> for setup instructions.</div>
+                            </div>
+                        </div>
+                    `;
+                    providerInfo.classList.remove('alert-info');
+                    providerInfo.classList.add('alert-warning');
+                    
+                    // Disable the generate button
+                    document.getElementById('generate-btn').disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error checking LLM providers:', error);
+                const providerInfo = document.getElementById('llm-provider-info');
+                providerInfo.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                        <div>
+                            <strong>Error:</strong> Failed to check LLM provider status.
+                        </div>
+                    </div>
+                `;
+                providerInfo.classList.remove('alert-info');
+                providerInfo.classList.add('alert-danger');
+            });
     });
 </script>
 {% endblock %}

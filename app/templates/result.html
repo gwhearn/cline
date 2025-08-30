@@ -32,6 +32,15 @@
             <a href="/" class="btn btn-outline-primary">Generate Another</a>
         </div>
         <p class="lead">Based on your description: <em>"{{ description }}"</em></p>
+        
+        <div class="alert alert-info">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-robot me-2"></i>
+                <div>
+                    <strong>Generated using:</strong> {{ llm_provider }} ({{ llm_model }})
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
